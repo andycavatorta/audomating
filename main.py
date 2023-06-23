@@ -176,7 +176,7 @@ class Main(threading.Thread):
                 5. 
             """
             if self.mode == names.CALIBRATE:
-                match command_name:
+                match source_name:
                     case names.LIMIT_SWITCH_TOP:
                         if value == 1: # top reached
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
