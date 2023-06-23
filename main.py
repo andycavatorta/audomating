@@ -1,67 +1,66 @@
-
 import queue
 import threading
 import time
 import RPi.GPIO as GPIO
 
-
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-limit_switch_top_gpio = 8
-limit_switch_bottom_gpio = 10
+names.LIMIT_SWITCH_TOP_gpio = 8
+names.LIMIT_SWITCH_BOTTOM_gpio = 10
 limit_switch_polling_delay_interval = 0.02 
 motor_direction_gpio = 4
 motor_pulse_gpio = 4
 
-motor_counter_value_max_safety = 1000000
+names.MOTOR_COUNTER_VALUE_max_safety = 1000000
 
-LIMIT_SWITCH_TOP = "limit_switch_top_gpio"
-LIMIT_SWITCH_BOTTOM = "limit_switch_bottom_gpio"
-MOTOR_DECEND_QUICKLY = "decend_quickly"
-MOTOR_ASCEND_QUICKLY = "ascend_quickly"
-MOTOR_ASCEND_SLOWLY = "ascend_slowly"
-MOTOR_STOP = "motor_stop"
-MOTOR_COUNTER_RESET = "motor_counter_reset"
-MOTOR_COUNTER_VALUE = "motor_counter_value"
-MOTOR_DIRECTION_DOWN = 0
-MOTOR_DIRECTION_UP = 1
-SHOOTING_EVENT = "shooting_event"
-CALIBRATE = "calibrate"
-PERFORM = "perform"
+class names:
+	LIMIT_SWITCH_TOP = "LIMIT_SWITCH_TOP_gpio"
+	LIMIT_SWITCH_BOTTOM = "LIMIT_SWITCH_BOTTOM_gpio"
+	MOTOR_DECEND_QUICKLY = "decend_quickly"
+	MOTOR_ASCEND_QUICKLY = "ascend_quickly"
+	MOTOR_ASCEND_SLOWLY = "ascend_slowly"
+	MOTOR_STOP = "MOTOR_STOP"
+	MOTOR_COUNTER_RESET = "MOTOR_COUNTER_RESET"
+	MOTOR_COUNTER_VALUE = "MOTOR_COUNTER_VALUE"
+	MOTOR_DIRECTION_DOWN = 0
+	MOTOR_DIRECTION_UP = 1
+	SHOOTING_EVENT = "SHOOTING_EVENT"
+	CALIBRATE = "CALIBRATE"
+	PERFORM = "PERFORM"
 
 class Switch_Poller(threading.Thread):
     def __init__(
             self,
-            limit_switch_top_gpio,
-            limit_switch_bottom_gpio,
+            names.LIMIT_SWITCH_TOP_gpio,
+            names.LIMIT_SWITCH_BOTTOM_gpio,
             event_callback
         ):
         threading.Thread.__init__(self)
-        self.limit_switch_top_gpio = limit_switch_top_gpio
-        self.limit_switch_bottom_gpio = limit_switch_bottom_gpio
+        self.names.LIMIT_SWITCH_TOP_gpio = names.LIMIT_SWITCH_TOP_gpio
+        self.names.LIMIT_SWITCH_BOTTOM_gpio = names.LIMIT_SWITCH_BOTTOM_gpio
         self.event_callback = event_callback
-        GPIO.setup(limit_switch_top_gpio, GPIO.IN, GPIO.PUD_DOWN)
-        GPIO.setup(limit_switch_bottom_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.setup(names.LIMIT_SWITCH_TOP_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.setup(names.LIMIT_SWITCH_BOTTOM_gpio, GPIO.IN, GPIO.PUD_DOWN)
         self.start()
 
     def run(self):
-        limit_switch_top_last_value = GPIO.input(limit_switch_top_gpio)
-        limit_switch_bottom_last_value = GPIO.input(limit_switch_bottom_gpio)
-        self.event_callback(LIMIT_SWITCH_TOP, limit_switch_top_last_value)
-        self.event_callback(LIMIT_SWITCH_BOTTOM, limit_switch_bottom_last_value)
+        names.LIMIT_SWITCH_TOP_last_value = GPIO.input(names.LIMIT_SWITCH_TOP_gpio)
+        names.LIMIT_SWITCH_BOTTOM_last_value = GPIO.input(names.LIMIT_SWITCH_BOTTOM_gpio)
+        self.event_callback(names.LIMIT_SWITCH_TOP, names.LIMIT_SWITCH_TOP_last_value)
+        self.event_callback(names.LIMIT_SWITCH_BOTTOM, names.LIMIT_SWITCH_BOTTOM_last_value)
         while True:
-            limit_switch_top_value = GPIO.input(limit_switch_top_gpio)
-            limit_switch_bottom_value = GPIO.input(limit_switch_bottom_gpio)
-            if limit_switch_top_value != limit_switch_top_last_value:
-                self.event_callback(LIMIT_SWITCH_TOP, limit_switch_top_value)
-                limit_switch_top_last_value = limit_switch_top_value
-            if limit_switch_bottom_value != limit_switch_bottom_last_value:
-                self.event_callback(LIMIT_SWITCH_BOTTOM, limit_switch_bottom_value)
-                limit_switch_bottom_last_value = limit_switch_bottom_value
+            names.LIMIT_SWITCH_TOP_value = GPIO.input(names.LIMIT_SWITCH_TOP_gpio)
+            names.LIMIT_SWITCH_BOTTOM_value = GPIO.input(names.LIMIT_SWITCH_BOTTOM_gpio)
+            if names.LIMIT_SWITCH_TOP_value != names.LIMIT_SWITCH_TOP_last_value:
+                self.event_callback(names.LIMIT_SWITCH_TOP, names.LIMIT_SWITCH_TOP_value)
+                names.LIMIT_SWITCH_TOP_last_value = names.LIMIT_SWITCH_TOP_value
+            if names.LIMIT_SWITCH_BOTTOM_value != names.LIMIT_SWITCH_BOTTOM_last_value:
+                self.event_callback(names.LIMIT_SWITCH_BOTTOM, names.LIMIT_SWITCH_BOTTOM_value)
+                names.LIMIT_SWITCH_BOTTOM_last_value = names.LIMIT_SWITCH_BOTTOM_value
             time.sleep(limit_switch_polling_delay_interval)
 
-class Query_Shooting_Events(threading.Thread):
+class Query_names.SHOOTING_EVENTs(threading.Thread):
     def __init__(
             self,
             event_callback
@@ -99,18 +98,18 @@ class Motor_Control(threading.Thread):
             try:
                 command_name = self.message_queue.get(False)
                 match command_name:
-                    case MOTOR_DECEND_QUICKLY:
-                        self.direction = MOTOR_DIRECTION_DOWN
+                    case names.MOTOR_DECEND_QUICKLY:
+                        self.direction = names.MOTOR_DIRECTION_DOWN
                         self.speed = 200.0
-                    case MOTOR_ASCEND_QUICKLY:
-                        self.direction = MOTOR_DIRECTION_UP 
+                    case names.MOTOR_ASCEND_QUICKLY:
+                        self.direction = names.MOTOR_DIRECTION_UP 
                         self.speed = 200.0
-                    case MOTOR_ASCEND_SLOWLY:
-                        self.direction = MOTOR_DIRECTION_UP 
+                    case names.MOTOR_ASCEND_SLOWLY:
+                        self.direction = names.MOTOR_DIRECTION_UP 
                         self.speed = 20.0
-                    case MOTOR_STOP:
+                    case names.MOTOR_STOP:
                         self.speed = 0.0
-                    case MOTOR_COUNTER_RESET:
+                    case names.MOTOR_COUNTER_RESET:
                         self.pulse_counter = 0
             except queue.empty:
                 pass
@@ -130,8 +129,8 @@ class Motor_Control(threading.Thread):
                     time.sleep(1.0/self.speed)
                     GPIO.output(self.motor_pulse_gpio, 1)
                     time.sleep(1.0/self.speed)
-            self.pulse_counter += self.speed if self.direction == MOTOR_DIRECTION_DOWN  else 0-self.speed
-            self.event_callback(MOTOR_COUNTER_VALUE, self.pulse_counter)
+            self.pulse_counter += self.speed if self.direction == names.MOTOR_DIRECTION_DOWN  else 0-self.speed
+            self.event_callback(names.MOTOR_COUNTER_VALUE, self.pulse_counter)
 
 
 class Main(threading.Thread):
@@ -141,17 +140,17 @@ class Main(threading.Thread):
         ):
         self.message_queue = queue.Queue()
         threading.Thread.__init__(self)
-        self.mode = CALIBRATE # or PERFORM
-        self.motor_counter_value = 0
-        self.limit_switch_bottom_reached = False
-        self.limit_switch_top_reached = False
-        self.motor_counter_value_max_measured = -1
+        self.mode = names.CALIBRATE # or names.PERFORM
+        self.names.MOTOR_COUNTER_VALUE = 0
+        self.names.LIMIT_SWITCH_BOTTOM_reached = False
+        self.names.LIMIT_SWITCH_TOP_reached = False
+        self.names.MOTOR_COUNTER_VALUE_max_measured = -1
         self.switch_poller = Switch_Poller(
-            limit_switch_top_gpio, 
-            limit_switch_bottom_gpio, 
+            names.LIMIT_SWITCH_TOP_gpio, 
+            names.LIMIT_SWITCH_BOTTOM_gpio, 
             self.message_receiver
         )
-        self.query_shooting_events = Query_Shooting_Events(
+        self.query_names.SHOOTING_EVENTs = Query_names.SHOOTING_EVENTs(
             self.message_receiver
         )
         self.motor_control = Motor_Control(
@@ -177,24 +176,24 @@ class Main(threading.Thread):
                 4. transport ascends 
                 5. 
             """
-            if self.mode == CALIBRATE:
+            if self.mode == names.CALIBRATE:
                 match command_name:
-                    case LIMIT_SWITCH_TOP:
+                    case names.LIMIT_SWITCH_TOP:
                         if value == 1: # top reached
-                            if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == False and self.names.LIMIT_SWITCH_TOP_reached == False:
                                 # this state implies that transport was at the top when calibration began
-                                self.motor_control.message_receiver(MOTOR_DECEND_QUICKLY)
-                            if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == False:
+                                self.motor_control.message_receiver(names.MOTOR_DECEND_QUICKLY)
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == True and self.names.LIMIT_SWITCH_TOP_reached == False:
                                 # this state implies that the transport has traversed from the bottom to top
-                                self.motor_control.message_receiver(MOTOR_STOP)
-                                self.limit_switch_top_reached = True
-                                self.motor_counter_value_max_measured = self.motor_counter_value
+                                self.motor_control.message_receiver(names.MOTOR_STOP)
+                                self.names.LIMIT_SWITCH_TOP_reached = True
+                                self.names.MOTOR_COUNTER_VALUE_max_measured = self.names.MOTOR_COUNTER_VALUE
 
-                            if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == True:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == False and self.names.LIMIT_SWITCH_TOP_reached == True:
                                 # this state implies 
                                 # is there anything to do?
                                 pass
-                            if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == True:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == True and self.names.LIMIT_SWITCH_TOP_reached == True:
                                 # this state implies 
                                 # is there anything to do?
                                 pass
@@ -202,18 +201,18 @@ class Main(threading.Thread):
                             # is there anything to do?
                             pass
 
-                    case LIMIT_SWITCH_BOTTOM:
+                    case names.LIMIT_SWITCH_BOTTOM:
                         if value == 1: # bottom reached
-                            if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == False and self.names.LIMIT_SWITCH_TOP_reached == False:
                                 # this state implies
                                 pass
-                            if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == False:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == True and self.names.LIMIT_SWITCH_TOP_reached == False:
                                 # this state implies
                                 pass
-                            if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == True:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == False and self.names.LIMIT_SWITCH_TOP_reached == True:
                                 # this state implies 
                                 pass
-                            if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == True:
+                            if self.names.LIMIT_SWITCH_BOTTOM_reached == True and self.names.LIMIT_SWITCH_TOP_reached == True:
                                 # this state implies 
                                 pass
                         else: # top limit switch opens
@@ -223,19 +222,19 @@ class Main(threading.Thread):
 
 
 
-                    case SHOOTING_EVENT:
+                    case names.SHOOTING_EVENT:
                         pass
-                    case MOTOR_COUNTER_VALUE:
+                    case names.MOTOR_COUNTER_VALUE:
                         pass
-            if self.mode == PERFORM:
+            if self.mode == names.PERFORM:
                 match command_name:
-                    case LIMIT_SWITCH_TOP:
+                    case names.LIMIT_SWITCH_TOP:
                         pass
-                    case LIMIT_SWITCH_BOTTOM:
+                    case names.LIMIT_SWITCH_BOTTOM:
                         pass
-                    case SHOOTING_EVENT:
+                    case names.SHOOTING_EVENT:
                         pass
-                    case MOTOR_COUNTER_VALUE:
+                    case names.MOTOR_COUNTER_VALUE:
                         pass
 
 main = Main()
