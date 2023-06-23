@@ -6,8 +6,8 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-names.limit_switch_top_gpio = 8
-names.limit_switch_bottom_gpio = 10
+limit_switch_top_gpio = 8
+limit_switch_bottom_gpio = 10
 limit_switch_polling_delay_interval = 0.02 
 motor_direction_gpio = 4
 motor_pulse_gpio = 4
