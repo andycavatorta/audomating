@@ -135,8 +135,7 @@ class Motor_Control(threading.Thread):
 
 class Main(threading.Thread):
     def __init__(
-            self,
-            event_callback
+            self
         ):
         self.message_queue = queue.Queue()
         threading.Thread.__init__(self)
