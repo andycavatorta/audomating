@@ -156,7 +156,7 @@ class Main(threading.Thread):
         )
         self.motor_control = Motor_Control(
             motor_direction_gpio, 
-            motor_pulse_gpio
+            motor_pulse_gpio,
             self.message_receiver
         )
         self.start()
