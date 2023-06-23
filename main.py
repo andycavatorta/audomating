@@ -60,7 +60,7 @@ class Switch_Poller(threading.Thread):
                 names.LIMIT_SWITCH_BOTTOM_last_value = names.LIMIT_SWITCH_BOTTOM_value
             time.sleep(limit_switch_polling_delay_interval)
 
-class Query_names.SHOOTING_EVENTs(threading.Thread):
+class Query_Shooting_Events(threading.Thread):
     def __init__(
             self,
             event_callback
@@ -150,7 +150,7 @@ class Main(threading.Thread):
             names.limit_switch_bottom_gpio, 
             self.message_receiver
         )
-        self.query_names.SHOOTING_EVENTs = Query_names.SHOOTING_EVENTs(
+        self.query_shooting_events = Query_Shooting_Events(
             self.message_receiver
         )
         self.motor_control = Motor_Control(
