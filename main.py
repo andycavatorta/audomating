@@ -111,7 +111,7 @@ class Motor_Control(threading.Thread):
                         self.speed = 0.0
                     case MOTOR_COUNTER_RESET:
                         self.pulse_counter = 0
-            except queue.empty:
+            except queue.Empty:
                 pass
                 
             GPIO.output(self.motor_direction_gpio, self.direction)
