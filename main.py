@@ -6,8 +6,8 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-names.LIMIT_SWITCH_TOP_gpio = 8
-names.LIMIT_SWITCH_BOTTOM_gpio = 10
+names.limit_switch_top_gpio = 8
+names.limit_switch_bottom_gpio = 10
 limit_switch_polling_delay_interval = 0.02 
 motor_direction_gpio = 4
 motor_pulse_gpio = 4
@@ -15,8 +15,8 @@ motor_pulse_gpio = 4
 names.MOTOR_COUNTER_VALUE_max_safety = 1000000
 
 class names:
-	LIMIT_SWITCH_TOP = "LIMIT_SWITCH_TOP_gpio"
-	LIMIT_SWITCH_BOTTOM = "LIMIT_SWITCH_BOTTOM_gpio"
+	LIMIT_SWITCH_TOP = "limit_switch_top"
+	LIMIT_SWITCH_BOTTOM = "limit_switch_bottom"
 	MOTOR_DECEND_QUICKLY = "decend_quickly"
 	MOTOR_ASCEND_QUICKLY = "ascend_quickly"
 	MOTOR_ASCEND_SLOWLY = "ascend_slowly"
@@ -32,26 +32,26 @@ class names:
 class Switch_Poller(threading.Thread):
     def __init__(
             self,
-            names.LIMIT_SWITCH_TOP_gpio,
-            names.LIMIT_SWITCH_BOTTOM_gpio,
+            limit_switch_top_gpio,
+            limit_switch_bottom_gpio,
             event_callback
         ):
         threading.Thread.__init__(self)
-        self.names.LIMIT_SWITCH_TOP_gpio = names.LIMIT_SWITCH_TOP_gpio
-        self.names.LIMIT_SWITCH_BOTTOM_gpio = names.LIMIT_SWITCH_BOTTOM_gpio
+        self.names.limit_switch_top_gpio = names.limit_switch_top_gpio
+        self.names.limit_switch_bottom_gpio = names.limit_switch_bottom_gpio
         self.event_callback = event_callback
-        GPIO.setup(names.LIMIT_SWITCH_TOP_gpio, GPIO.IN, GPIO.PUD_DOWN)
-        GPIO.setup(names.LIMIT_SWITCH_BOTTOM_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.setup(names.limit_switch_top_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.setup(names.limit_switch_bottom_gpio, GPIO.IN, GPIO.PUD_DOWN)
         self.start()
 
     def run(self):
-        names.LIMIT_SWITCH_TOP_last_value = GPIO.input(names.LIMIT_SWITCH_TOP_gpio)
-        names.LIMIT_SWITCH_BOTTOM_last_value = GPIO.input(names.LIMIT_SWITCH_BOTTOM_gpio)
+        names.LIMIT_SWITCH_TOP_last_value = GPIO.input(names.limit_switch_top_gpio)
+        names.LIMIT_SWITCH_BOTTOM_last_value = GPIO.input(names.limit_switch_bottom_gpio)
         self.event_callback(names.LIMIT_SWITCH_TOP, names.LIMIT_SWITCH_TOP_last_value)
         self.event_callback(names.LIMIT_SWITCH_BOTTOM, names.LIMIT_SWITCH_BOTTOM_last_value)
         while True:
-            names.LIMIT_SWITCH_TOP_value = GPIO.input(names.LIMIT_SWITCH_TOP_gpio)
-            names.LIMIT_SWITCH_BOTTOM_value = GPIO.input(names.LIMIT_SWITCH_BOTTOM_gpio)
+            names.LIMIT_SWITCH_TOP_value = GPIO.input(names.limit_switch_top_gpio)
+            names.LIMIT_SWITCH_BOTTOM_value = GPIO.input(names.limit_switch_bottom_gpio)
             if names.LIMIT_SWITCH_TOP_value != names.LIMIT_SWITCH_TOP_last_value:
                 self.event_callback(names.LIMIT_SWITCH_TOP, names.LIMIT_SWITCH_TOP_value)
                 names.LIMIT_SWITCH_TOP_last_value = names.LIMIT_SWITCH_TOP_value
@@ -146,8 +146,8 @@ class Main(threading.Thread):
         self.names.LIMIT_SWITCH_TOP_reached = False
         self.names.MOTOR_COUNTER_VALUE_max_measured = -1
         self.switch_poller = Switch_Poller(
-            names.LIMIT_SWITCH_TOP_gpio, 
-            names.LIMIT_SWITCH_BOTTOM_gpio, 
+            names.limit_switch_top_gpio, 
+            names.limit_switch_bottom_gpio, 
             self.message_receiver
         )
         self.query_names.SHOOTING_EVENTs = Query_names.SHOOTING_EVENTs(
