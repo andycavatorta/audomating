@@ -19,19 +19,20 @@ motor_pulse_gpio = 13
 
 motor_counter_value_max_safety = 10000000
 
-LIMIT_SWITCH_TOP = "limit_switch_top_gpio"
-LIMIT_SWITCH_BOTTOM = "limit_switch_bottom_gpio"
-MOTOR_DECEND_QUICKLY = "decend_quickly"
-MOTOR_ASCEND_QUICKLY = "ascend_quickly"
-MOTOR_ASCEND_SLOWLY = "ascend_slowly"
-MOTOR_STOP = "motor_stop"
-MOTOR_COUNTER_RESET = "motor_counter_reset"
-MOTOR_COUNTER_VALUE = "motor_counter_value"
-MOTOR_DIRECTION_DOWN = 0
-MOTOR_DIRECTION_UP = 1
-SHOOTING_EVENT = "shooting_event"
-CALIBRATE = "calibrate"
-PERFORM = "perform"
+class Commands:
+    LIMIT_SWITCH_TOP = "limit_switch_top_gpio"
+    LIMIT_SWITCH_BOTTOM = "limit_switch_bottom_gpio"
+    MOTOR_DECEND_QUICKLY = "decend_quickly"
+    MOTOR_ASCEND_QUICKLY = "ascend_quickly"
+    MOTOR_ASCEND_SLOWLY = "ascend_slowly"
+    MOTOR_STOP = "motor_stop"
+    MOTOR_COUNTER_RESET = "motor_counter_reset"
+    MOTOR_COUNTER_VALUE = "motor_counter_value"
+    MOTOR_DIRECTION_DOWN = 0
+    MOTOR_DIRECTION_UP = 1
+    SHOOTING_EVENT = "shooting_event"
+    CALIBRATE = "calibrate"
+    PERFORM = "perform"
 
 class Switch_Poller(threading.Thread):
     def __init__(
@@ -51,16 +52,16 @@ class Switch_Poller(threading.Thread):
     def run(self):
         limit_switch_top_last_value = GPIO.input(limit_switch_top_gpio)
         limit_switch_bottom_last_value = GPIO.input(limit_switch_bottom_gpio)
-        self.event_callback(LIMIT_SWITCH_TOP, limit_switch_top_last_value)
-        self.event_callback(LIMIT_SWITCH_BOTTOM, limit_switch_bottom_last_value)
+        self.event_callback(Commands.LIMIT_SWITCH_TOP, limit_switch_top_last_value)
+        self.event_callback(Commands.LIMIT_SWITCH_BOTTOM, limit_switch_bottom_last_value)
         while True:
             limit_switch_top_value = GPIO.input(limit_switch_top_gpio)
             limit_switch_bottom_value = GPIO.input(limit_switch_bottom_gpio)
             if limit_switch_top_value != limit_switch_top_last_value:
-                self.event_callback(LIMIT_SWITCH_TOP, limit_switch_top_value)
+                self.event_callback(Commands.LIMIT_SWITCH_TOP, limit_switch_top_value)
                 limit_switch_top_last_value = limit_switch_top_value
             if limit_switch_bottom_value != limit_switch_bottom_last_value:
-                self.event_callback(LIMIT_SWITCH_BOTTOM, limit_switch_bottom_value)
+                self.event_callback(Commands.LIMIT_SWITCH_BOTTOM, limit_switch_bottom_value)
                 limit_switch_bottom_last_value = limit_switch_bottom_value
             time.sleep(limit_switch_polling_delay_interval)
 
@@ -102,18 +103,18 @@ class Motor_Control(threading.Thread):
             try:
                 command_name = self.message_queue.get(False)
                 match command_name:
-                    case MOTOR_DECEND_QUICKLY:
-                        self.direction = MOTOR_DIRECTION_DOWN
+                    case Commands.MOTOR_DECEND_QUICKLY:
+                        self.direction = Commands.MOTOR_DIRECTION_DOWN
                         self.speed = 200.0
-                    case MOTOR_ASCEND_QUICKLY:
-                        self.direction = MOTOR_DIRECTION_UP 
+                    case Commands.MOTOR_ASCEND_QUICKLY:
+                        self.direction = Commands.MOTOR_DIRECTION_UP 
                         self.speed = 200.0
-                    case MOTOR_ASCEND_SLOWLY:
-                        self.direction = MOTOR_DIRECTION_UP 
+                    case Commands.MOTOR_ASCEND_SLOWLY:
+                        self.direction = Commands.MOTOR_DIRECTION_UP 
                         self.speed = 20.0
-                    case MOTOR_STOP:
+                    case Commands.MOTOR_STOP:
                         self.speed = 0.0
-                    case MOTOR_COUNTER_RESET:
+                    case Commands.MOTOR_COUNTER_RESET:
                         self.pulse_counter = 0
             except queue.empty:
                 pass
@@ -133,8 +134,8 @@ class Motor_Control(threading.Thread):
                     time.sleep(1.0/self.speed)
                     GPIO.output(self.motor_pulse_gpio, 1)
                     time.sleep(1.0/self.speed)
-            self.pulse_counter += self.speed if self.direction == MOTOR_DIRECTION_DOWN  else 0-self.speed
-            self.event_callback(MOTOR_COUNTER_VALUE, self.pulse_counter)
+            self.pulse_counter += self.speed if self.direction == Commands.MOTOR_DIRECTION_DOWN  else 0-self.speed
+            self.event_callback(Commands.MOTOR_COUNTER_VALUE, self.pulse_counter)
 
 
 class Main(threading.Thread):
@@ -144,7 +145,7 @@ class Main(threading.Thread):
         ):
         self.message_queue = queue.Queue()
         threading.Thread.__init__(self)
-        self.mode = CALIBRATE # or PERFORM
+        self.mode = Commands.CALIBRATE # or PERFORM
         self.motor_counter_value = 0
         self.limit_switch_bottom_reached = False
         self.limit_switch_top_reached = False
@@ -180,16 +181,16 @@ class Main(threading.Thread):
                 4. motor counter is reset
                 5. transport ascends 
             """
-            if self.mode == CALIBRATE:
+            if self.mode == Commands.CALIBRATE:
                 match command_name:
-                    case LIMIT_SWITCH_TOP:
+                    case Commands.LIMIT_SWITCH_TOP:
                         if value == 1: # top reached
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
                                 # this state implies that transport was at the top when calibration began
-                                self.motor_control.message_receiver(MOTOR_DECEND_QUICKLY)
+                                self.motor_control.message_receiver(Commands.MOTOR_DECEND_QUICKLY)
                             if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == False:
                                 # this state implies that the transport has traversed from the bottom to top
-                                self.motor_control.message_receiver(MOTOR_STOP)
+                                self.motor_control.message_receiver(Commands.MOTOR_STOP)
                                 self.limit_switch_top_reached = True
                                 self.motor_counter_value_max_measured = self.motor_counter_value
 
@@ -205,7 +206,7 @@ class Main(threading.Thread):
                             # is there anything to do?
                             pass
 
-                    case LIMIT_SWITCH_BOTTOM:
+                    case Commands.LIMIT_SWITCH_BOTTOM:
                         if value == 1: # bottom reached
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
                                 # this state implies
@@ -223,19 +224,19 @@ class Main(threading.Thread):
                             # is there anything to do?
                             pass
 
-                    case SHOOTING_EVENT:
+                    case Commands.SHOOTING_EVENT:
                         pass
-                    case MOTOR_COUNTER_VALUE:
+                    case Commands.MOTOR_COUNTER_VALUE:
                         pass
-            if self.mode == PERFORM:
+            if self.mode == Commands.PERFORM:
                 match command_name:
-                    case LIMIT_SWITCH_TOP:
-                        self.motor_control.message_receiver(MOTOR_STOP)
-                    case LIMIT_SWITCH_BOTTOM:
-                        self.motor_control.message_receiver(MOTOR_ASCEND_SLOWLY)
-                    case SHOOTING_EVENT:
-                        self.motor_control.message_receiver(MOTOR_DECEND_QUICKLY)
-                    case MOTOR_COUNTER_VALUE:
+                    case Commands.LIMIT_SWITCH_TOP:
+                        self.motor_control.message_receiver(Commands.MOTOR_STOP)
+                    case Commands.LIMIT_SWITCH_BOTTOM:
+                        self.motor_control.message_receiver(Commands.MOTOR_ASCEND_SLOWLY)
+                    case Commands.SHOOTING_EVENT:
+                        self.motor_control.message_receiver(Commands.MOTOR_DECEND_QUICKLY)
+                    case Commands.MOTOR_COUNTER_VALUE:
                         pass
 
 main = Main()
