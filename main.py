@@ -97,7 +97,7 @@ class Motor_Control(threading.Thread):
         self.pulse_counter = 0
         self.start()
 
-    def message_receiver(self):
+    def message_receiver(self,command_name):
         self.message_queue.put(command_name)
 
     def run(self):
@@ -247,4 +247,4 @@ main = Main()
 def issue_motor_command(command):
     main.motor_control.message_receiver(command)
 
-
+#issue_motor_command(Commands.MOTOR_ASCEND_SLOWLY)
