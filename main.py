@@ -88,6 +88,8 @@ class Motor_Control(threading.Thread):
         threading.Thread.__init__(self)
         self.motor_direction_gpio = motor_direction_gpio 
         self.motor_pulse_gpio = motor_pulse_gpio
+        GPIO.setup(motor_direction_gpio, GPIO.OUT)
+        GPIO.setup(motor_pulse_gpio, GPIO.OUT)
         self.direction = 0 # 0==up?
         self.speed = 0
         self.event_callback = event_callback
