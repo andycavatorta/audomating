@@ -209,10 +209,10 @@ class Main(threading.Thread):
                         if value == 1: # bottom reached
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
                                 # this state implies
-
+                                pass
                             if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == False:
                                 # this state implies
-
+                                pass
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == True:
                                 # this state implies 
                                 pass
