@@ -61,7 +61,6 @@ class Switch_Poller(threading.Thread):
                 limit_switch_bottom_last_value = limit_switch_bottom_value
             time.sleep(limit_switch_polling_delay_interval)
 
-
 class Query_Shooting_Events(threading.Thread):
     def __init__(
             self,
@@ -220,6 +219,7 @@ class Main(threading.Thread):
                         else: # top limit switch opens
                             # is there anything to do?
                             pass
+
 
 
 
