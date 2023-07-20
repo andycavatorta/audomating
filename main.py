@@ -18,8 +18,8 @@ GPIO.setwarnings(False)
 limit_switch_top_gpio = 8
 limit_switch_bottom_gpio = 10
 limit_switch_polling_delay_interval = 0.02 
-motor_direction_gpio = 23
-motor_pulse_gpio = 24
+motor_direction_gpio = 24
+motor_pulse_gpio = 23
 
 motor_counter_value_max_safety = 10000000
 
