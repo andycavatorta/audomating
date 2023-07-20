@@ -1,9 +1,12 @@
+"""
+create reverse ssh tunnel
+create http interface
+"""
 
 import queue
 import threading
 import time
 import RPi.GPIO as GPIO
-
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -11,10 +14,10 @@ GPIO.setwarnings(False)
 limit_switch_top_gpio = 8
 limit_switch_bottom_gpio = 10
 limit_switch_polling_delay_interval = 0.02 
-motor_direction_gpio = 4
-motor_pulse_gpio = 4
+motor_direction_gpio = 12
+motor_pulse_gpio = 13
 
-motor_counter_value_max_safety = 1000000
+motor_counter_value_max_safety = 10000000
 
 LIMIT_SWITCH_TOP = "limit_switch_top_gpio"
 LIMIT_SWITCH_BOTTOM = "limit_switch_bottom_gpio"
@@ -161,21 +164,21 @@ class Main(threading.Thread):
         )
         self.start()
 
-    def message_receiver(self, source_name, value):
-        self.message_queue.put((source_name, value))
+    def message_receiver(self, command_name, value):
+        print(command_name, value)
+        self.message_queue.put((command_name, value))
 
     def run(self):
         while True:
-            source_name, value = self.message_queue.get(True)
+            command_name, value = self.message_queue.get(True)
             """
             The calibration process:
                 0. if top limit switch is closed and bottom switch has not been reached, descend
-                0. if bottom limit switch is closed 
-                1. transport decends to the bottom limit switch
-                2. motor stops
-                3. motor counter is reset
-                4. transport ascends 
-                5. 
+                1. if bottom limit switch is closed 
+                2. transport decends to the bottom limit switch
+                3. motor stops
+                4. motor counter is reset
+                5. transport ascends 
             """
             if self.mode == CALIBRATE:
                 match command_name:
@@ -220,9 +223,6 @@ class Main(threading.Thread):
                             # is there anything to do?
                             pass
 
-
-
-
                     case SHOOTING_EVENT:
                         pass
                     case MOTOR_COUNTER_VALUE:
@@ -230,12 +230,19 @@ class Main(threading.Thread):
             if self.mode == PERFORM:
                 match command_name:
                     case LIMIT_SWITCH_TOP:
-                        pass
+                        self.motor_control.message_receiver(MOTOR_STOP)
                     case LIMIT_SWITCH_BOTTOM:
-                        pass
+                        self.motor_control.message_receiver(MOTOR_ASCEND_SLOWLY)
                     case SHOOTING_EVENT:
-                        pass
+                        self.motor_control.message_receiver(MOTOR_DECEND_QUICKLY)
                     case MOTOR_COUNTER_VALUE:
                         pass
 
 main = Main()
+
+
+# tests
+def issue_motor_command(command):
+    main.motor_control.message_receiver(command)
+
+
