@@ -117,7 +117,7 @@ class Motor_Control(threading.Thread):
                         self.speed = 200.0
                     case Commands.MOTOR_ASCEND_SLOWLY:
                         self.direction = Commands.MOTOR_DIRECTION_UP 
-                        self.speed = 200.0
+                        self.speed = 40.0
                     case Commands.MOTOR_STOP:
                         self.speed = 0.0
                     case Commands.MOTOR_COUNTER_RESET:
