@@ -21,6 +21,9 @@ limit_switch_polling_delay_interval = 0.02
 motor_direction_gpio = 24
 motor_pulse_gpio = 23
 
+motor_slow_speed = 500.0
+motor_fast_speed = 5000.0
+
 motor_counter_value_max_safety = 10000000
 
 class Commands:
@@ -111,13 +114,13 @@ class Motor_Control(threading.Thread):
                 match command_name:
                     case Commands.MOTOR_DESCEND_QUICKLY:
                         self.direction = Commands.MOTOR_DIRECTION_DOWN
-                        self.speed = 200.0
+                        self.speed = motor_fast_speed
                     case Commands.MOTOR_ASCEND_QUICKLY:
                         self.direction = Commands.MOTOR_DIRECTION_UP 
-                        self.speed = 200.0
+                        self.speed = motor_fast_speed
                     case Commands.MOTOR_ASCEND_SLOWLY:
                         self.direction = Commands.MOTOR_DIRECTION_UP 
-                        self.speed = 100.0
+                        self.speed = motor_slow_speed
                     case Commands.MOTOR_STOP:
                         self.speed = 0.0
                     case Commands.MOTOR_COUNTER_RESET:
@@ -128,14 +131,14 @@ class Motor_Control(threading.Thread):
             GPIO.output(self.motor_direction_gpio, self.direction)
             if self.speed == 0.0:
                 time.sleep(1)
-            if self.speed == 100.0:
-                for pulse in range(200):
+            if self.speed == motor_slow_speed:
+                for pulse in range(motor_slow_speed * 2):
                     GPIO.output(self.motor_pulse_gpio, 0)
                     time.sleep(1.0/self.speed)
                     GPIO.output(self.motor_pulse_gpio, 1)
                     time.sleep(1.0/self.speed)
-            if self.speed == 200.0:
-                for pulse in range(400):
+            if self.speed == motor_fast_speed:
+                for pulse in range(motor_fast_speed * 2):
                     GPIO.output(self.motor_pulse_gpio, 0)
                     time.sleep(1.0/self.speed)
                     GPIO.output(self.motor_pulse_gpio, 1)
