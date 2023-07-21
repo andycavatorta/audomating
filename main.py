@@ -5,8 +5,12 @@ create http interface
 
 import queue
 import threading
+import ssl
+import smtplib
 import time
 import RPi.GPIO as GPIO
+from email_password import email_password
+from email.message import EmailMessage
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -22,7 +26,7 @@ motor_counter_value_max_safety = 10000000
 class Commands:
     LIMIT_SWITCH_TOP = "limit_switch_top_gpio"
     LIMIT_SWITCH_BOTTOM = "limit_switch_bottom_gpio"
-    MOTOR_DECEND_QUICKLY = "decend_quickly"
+    MOTOR_DESCEND_QUICKLY = "descend_quickly"
     MOTOR_ASCEND_QUICKLY = "ascend_quickly"
     MOTOR_ASCEND_SLOWLY = "ascend_slowly"
     MOTOR_STOP = "motor_stop"
@@ -105,7 +109,7 @@ class Motor_Control(threading.Thread):
             try:
                 command_name = self.message_queue.get(False)
                 match command_name:
-                    case Commands.MOTOR_DECEND_QUICKLY:
+                    case Commands.MOTOR_DESCEND_QUICKLY:
                         self.direction = Commands.MOTOR_DIRECTION_DOWN
                         self.speed = 200.0
                     case Commands.MOTOR_ASCEND_QUICKLY:
@@ -139,6 +143,30 @@ class Motor_Control(threading.Thread):
             self.pulse_counter += self.speed if self.direction == Commands.MOTOR_DIRECTION_DOWN  else 0-self.speed
             self.event_callback(Commands.MOTOR_COUNTER_VALUE, self.pulse_counter)
 
+class Notifications(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.message_queue = queue.Queue()
+        self.email_sender = "autoprayer23@gmail.com"
+        self.email_receiver = "arigebhardt82@gmail.com"
+        self.subject = "Automating Their Prayers Error Report"
+        self.context = ssl.create_default_context()
+        self.start()
+
+    def send(self, body):
+        em = EmailMessage()
+        em["From"] = self.email_sender
+        em["To"] = self.email_receiver
+        em["Subject"] = self.subject
+        em.set_content(body)
+        self.message_queue.put(em)
+
+    def run(self):
+        while True:
+            em = self.message_queue.get(True, None)
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=self.context) as smtp:
+                smtp.login(self.email_sender, email_password)
+                smtp.sendmail(self.email_sender, self.email_receiver, em.as_string())
 
 class Main(threading.Thread):
     def __init__(
@@ -177,7 +205,7 @@ class Main(threading.Thread):
             The calibration process:
                 0. if top limit switch is closed and bottom switch has not been reached, descend
                 1. if bottom limit switch is closed 
-                2. transport decends to the bottom limit switch
+                2. transport descends to the bottom limit switch
                 3. motor stops
                 4. motor counter is reset
                 5. transport ascends 
@@ -188,7 +216,7 @@ class Main(threading.Thread):
                         if value == 1: # top reached
                             if self.limit_switch_bottom_reached == False and self.limit_switch_top_reached == False:
                                 # this state implies that transport was at the top when calibration began
-                                self.motor_control.message_receiver(Commands.MOTOR_DECEND_QUICKLY)
+                                self.motor_control.message_receiver(Commands.MOTOR_DESCEND_QUICKLY)
                             if self.limit_switch_bottom_reached == True and self.limit_switch_top_reached == False:
                                 # this state implies that the transport has traversed from the bottom to top
                                 self.motor_control.message_receiver(Commands.MOTOR_STOP)
@@ -236,7 +264,7 @@ class Main(threading.Thread):
                     case Commands.LIMIT_SWITCH_BOTTOM:
                         self.motor_control.message_receiver(Commands.MOTOR_ASCEND_SLOWLY)
                     case Commands.SHOOTING_EVENT:
-                        self.motor_control.message_receiver(Commands.MOTOR_DECEND_QUICKLY)
+                        self.motor_control.message_receiver(Commands.MOTOR_DESCEND_QUICKLY)
                     case Commands.MOTOR_COUNTER_VALUE:
                         pass
 
