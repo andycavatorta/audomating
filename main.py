@@ -117,7 +117,7 @@ class Motor_Control(threading.Thread):
                         self.speed = 200.0
                     case Commands.MOTOR_ASCEND_SLOWLY:
                         self.direction = Commands.MOTOR_DIRECTION_UP 
-                        self.speed = 40.0
+                        self.speed = 100.0
                     case Commands.MOTOR_STOP:
                         self.speed = 0.0
                     case Commands.MOTOR_COUNTER_RESET:
@@ -128,8 +128,8 @@ class Motor_Control(threading.Thread):
             GPIO.output(self.motor_direction_gpio, self.direction)
             if self.speed == 0.0:
                 time.sleep(1)
-            if self.speed == 40.0:
-                for pulse in range(80):
+            if self.speed == 100.0:
+                for pulse in range(200):
                     GPIO.output(self.motor_pulse_gpio, 0)
                     time.sleep(1.0/self.speed)
                     GPIO.output(self.motor_pulse_gpio, 1)
