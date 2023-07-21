@@ -21,8 +21,8 @@ limit_switch_polling_delay_interval = 0.02
 motor_direction_gpio = 24
 motor_pulse_gpio = 23
 
-motor_slow_speed = 500.0
-motor_fast_speed = 5000.0
+motor_slow_speed = 500
+motor_fast_speed = 5000
 
 motor_counter_value_max_safety = 10000000
 
