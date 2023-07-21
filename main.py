@@ -9,8 +9,8 @@ import ssl
 import smtplib
 import time
 import RPi.GPIO as GPIO
-from email_password import email_password
-from email.message import EmailMessage
+#from email_password import email_password
+#from email.message import EmailMessage
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
