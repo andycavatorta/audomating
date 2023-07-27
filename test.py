@@ -20,7 +20,7 @@ class Motor(threading.Thread):
         GPIO.setup(motor_direction_gpio, GPIO.OUT)
         GPIO.setup(motor_pulse_gpio, GPIO.OUT)
         self.isOn = False
-        self.period
+        self.period = period
         self.start()
 
     def on(self):
