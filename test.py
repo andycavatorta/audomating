@@ -31,7 +31,7 @@ class Motor(threading.Thread):
 
     def run(self):
         while self.isOn:
-            GPIO.output(self.motor_pulse_gpio, 0)
+            GPIO.output(motor_pulse_gpio, 0)
             time.sleep(self.period)
-            GPIO.output(self.motor_pulse_gpio, 1)
+            GPIO.output(motor_pulse_gpio, 1)
             time.sleep(self.period)
