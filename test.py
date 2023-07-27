@@ -19,19 +19,26 @@ class Motor(threading.Thread):
         threading.Thread.__init__(self)
         GPIO.setup(motor_direction_gpio, GPIO.OUT)
         GPIO.setup(motor_pulse_gpio, GPIO.OUT)
-        self.isOn = False
         self.period = period
+        self.queue = queue.Queue()
         self.start()
 
     def on(self):
-        self.isOn = True
+        self.queue.put(True)
 
     def off(self):
-        self.isOn = False
+        self.queue.put(False)
 
     def run(self):
-        while self.isOn:
-            GPIO.output(motor_pulse_gpio, 0)
-            time.sleep(self.period)
-            GPIO.output(motor_pulse_gpio, 1)
-            time.sleep(self.period)
+        while True:
+            try:
+                isOn = self.queue.get(False)
+            except queue.Empty:
+                pass
+            if isOn:
+                GPIO.output(motor_pulse_gpio, 0)
+                time.sleep(self.period)
+                GPIO.output(motor_pulse_gpio, 1)
+                time.sleep(self.period)
+            else:
+                time.sleep(self.period)
