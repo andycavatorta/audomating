@@ -30,6 +30,7 @@ class Motor(threading.Thread):
         self.queue.put(False)
 
     def run(self):
+        isOn = False
         while True:
             try:
                 isOn = self.queue.get(False)
