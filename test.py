@@ -14,7 +14,7 @@ class Switches(threading.Thread):
         self.messageQueue = queue.Queue()
         self.start()
 
-class Motor(threading):
+class Motor(threading.Thread):
     def __init__(self, period):
         threading.Thread.__init__(self)
         GPIO.setup(motor_direction_gpio, GPIO.OUT)
