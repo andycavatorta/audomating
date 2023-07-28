@@ -18,10 +18,10 @@ class Switches(threading.Thread):
         self.start()
     
     def readTop(self, boolean=True):
-        self.queue((True, boolean))
+        self.queue.put((True, boolean))
 
     def readBottom(self, boolean=True):
-        self.queue((False, boolean))
+        self.queue.put((False, boolean))
     
     def run(self):
         top, bottom = False, False
