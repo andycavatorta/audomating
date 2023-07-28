@@ -4,15 +4,42 @@ import threading
 import time
 
 limit_switch_top_gpio = 8
-limit_switch_bottom_gpio = 10
+limit_switch_bottom_gpio = 25
 motor_direction_gpio = 24
 motor_pulse_gpio = 23
 
 class Switches(threading.Thread):
-    def __init__(self):
+    def __init__(self, period):
         threading.Thread.__init__(self)
-        self.messageQueue = queue.Queue()
+        GPIO.setup(limit_switch_top_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.setup(limit_switch_bottom_gpio, GPIO.IN, GPIO.PUD_DOWN)
+        self.period = period
+        self.queue = queue.Queue()
         self.start()
+    
+    def readTop(self, boolean=True):
+        self.queue((True, boolean))
+
+    def readBottom(self, boolean=True):
+        self.queue((False, boolean))
+    
+    def run(self):
+        top, bottom = False, False
+        topLastState, bottomLastState = 0, 0
+        try:
+            switch, boolean = self.queue.get(False)
+            if switch:
+                top = boolean
+            else:
+                bottom = boolean
+        except queue.Empty:
+            pass
+        if top and topLastState != GPIO.input(limit_switch_top_gpio):
+            topLastState = GPIO.input(limit_switch_top_gpio)
+            print("Top State: " + str(topLastState))
+        if bottom and bottomLastState != GPIO.input(limit_switch_bottom_gpio):
+            bottomLastState = GPIO.input(limit_switch_bottom_gpio)
+            print("Bottom State: " + str(bottomLastState))
 
 class Motor(threading.Thread):
     def __init__(self, period):
